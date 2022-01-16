@@ -1,6 +1,11 @@
 ---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: "Kaitlyn Elliott"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -22,21 +27,22 @@ The completed exercise is due on <>.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have done data analysis in excel and used R for an introductory stats class but it was very minimal use. I don't know R that well but I have also used it for view NetCDF data with help from a friend.
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I am a detailed person so I think that will be helpful when it comes to making nice visualizations.
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I am very new to R, and as a learner I need to know all the details before I get the big picture and that can be difficult when it comes to coding and languages. 
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/katieelliott98/Environmental_Data_Analytics_2022.git
+
 
 
