@@ -92,8 +92,8 @@ median(5, 4, 6, 4, 6)
 # Conditional statements
 4 > 5
 4 < 5
-4 != 5
-4 == 5
+4 != 5 #not equal
+4 == 5 #equal
 
 ```
 
@@ -127,6 +127,7 @@ longnameforillustration
 ```{r}
 long_name_for_illustration <- 11
 
+long_name_for_illustration
 ```
 
 ### Comments
@@ -145,7 +146,7 @@ seq(1, 10)
 ten_sequence <- seq(1, 10)
 ten_sequence
 
-seq(1, 10, 2) # from, to, by
+seq(1, 10, 5) # from, to, by
 ```
 
 The basic form of a function is `functionname()`, and the packages we will use in this class will use these basic forms. However, there may be situations when you will want to create your own function. Below is a description of how to write functions through the metaphor of creating a recipe (credit: @IsabellaGhement on Twitter). 
@@ -178,7 +179,7 @@ recipe2 <- function(x){
   mix1 <- x*2
   mix2 <- x/2
   return(list(mix1 = mix1, #comma indicates we continue onto the next line
-              mix2 = mix2))
+              mix2 = mix2)) #use equal when within an argument/function/in parenthesis 
 }
 
 doublesimplemeal <- recipe2(6)
@@ -221,12 +222,12 @@ recipe5 <- function(x) {
     x
   }
 }
-meal <- recipe4(4); meal
+meal <- recipe4(4); meal #semi colon will run the next thing on line/print
 meal2 <- recipe4(2); meal2
 meal3 <- recipe5(3); meal3
 
 recipe6 <- function(x){
-  ifelse(x<3, x*2, x/2) #log_exp, if TRUE, if FALSE
+  ifelse(x<3, x*2, x/2) #log_exp, if TRUE, if FALSE #given this, then do this if true, do this if false
   
 }
 
