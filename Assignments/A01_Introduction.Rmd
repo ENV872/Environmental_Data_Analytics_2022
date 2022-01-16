@@ -1,0 +1,42 @@
+---
+title: "Assignment 1: Introduction"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+---
+
+## OVERVIEW
+
+This exercise accompanies the introductory material in Environmental Data Analytics. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Lima_A01_Introduction.Rmd") prior to submission.
+
+The completed exercise is due on <>.
+
+## 1) Discussion Questions
+
+1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
+
+> Answer: 
+
+2. Are there any components of the course about which you feel confident?
+
+> Answer: 
+
+3. Are there any components of the course about which you feel apprehensive?
+
+> Answer: 
+
+
+## 2) GitHub
+
+Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
+
+> Answer: 
+
+

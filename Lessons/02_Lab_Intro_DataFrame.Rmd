@@ -1,0 +1,119 @@
+---
+title: "Intro to Data Frames in R"
+author: "Environmental Data Analytics | John Fay and Luana Lima"
+date: "1/10/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data frame definition
+
+A **data frame** is used for storing data tables. It a list a vector of equal length. 
+
+When we import data to R, data frame is the preferred way for storing the data because columns can have different modes (character, numeric, integer, logical, complex).
+
+
+## Data frame built-in example
+
+Let's look into a built-in data frame from package "datasets" - cars. The data give the speed of cars and the distances taken to stop.
+
+```{r cars}
+cars
+```
+
+Note that it has 2 columns and 50 rows.
+
+## Data frame columns
+
+Suppose you want just the column speed. How would you access that data? 
+
+```{r}
+cars$speed
+```
+
+How would you store it on another object?
+
+```{r}
+car_speed <- cars$speed
+car_speed
+```
+
+
+## Transforming object in a data frame
+
+Is the new object you create a data frame?
+```{r}
+#Option 1
+class(car_speed)
+
+#Option 2
+is.data.frame(car_speed)
+```
+
+How could you make it a data frame?
+
+```{r}
+df_car_speed <- as.data.frame(car_speed)
+df_car_speed
+class(df_car_speed)
+```
+
+## Adding columns to a data frame
+
+How could you add columns to *df_car_speed*?
+
+```{r}
+car_dist <- cars$dist
+
+#Option 1
+df <- cbind(df_car_speed,car_dist)  #similarly rows could be added using rbind()
+class(df)
+df
+
+#Or Option 2 - transform into a data frame before binding
+df_car_dist <- as.data.frame(car_dist)  #op2
+df_opt2 <- cbind(df_car_speed,df_car_dist)
+class(df_opt2)
+df_opt2
+
+```
+
+Note that when we transformed the vector in a data frame the name of the vector became the column name.
+
+```{r}
+colnames(df)  #or simply names()
+names(df)
+```
+
+## Creating a data frame
+
+How would you create a data frame?
+
+```{r}
+#useful function data.frame()
+create_df <- data.frame("speed"=car_speed,"dist"=car_dist)
+create_df
+```
+
+
+## Data frame functions
+
+Some useful functions to use with data frames.
+
+```{r}
+ncol(df)  
+nrow(df)  
+length(df)  #same as ncol
+summary(df)
+head(df) #show the first 6 rows of df
+
+#If you know the number of the column you want you can refer to that to access column
+df[,1]
+
+#you could also use this notation to delete columns
+df <- df[,-2]
+df
+```
