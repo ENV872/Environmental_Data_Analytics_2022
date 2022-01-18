@@ -1,0 +1,30 @@
+#
+# U.S. Geological Survey
+# National Water Information System
+# Retrieved: 2019-03-20 15:16:59 EDT      (sdww01)
+#
+# ---------------------------------- WARNING ----------------------------------------
+# Some of the data that you have obtained from this U.S. Geological Survey database
+# may not have received Director's approval. Any such data values are qualified
+# as provisional and are subject to revision. Provisional data are released on the
+# condition that neither the USGS nor the United States Government may be held liable
+# for any damages resulting from its use.
+#
+# Further Descriptions of the parameter_cd column can be found at:
+# https://waterdata.usgs.gov/nwis/pmcodes
+# Further Descriptions of codes in the result_cd column can be found at:
+# https://waterdata.usgs.gov/nwis/help?codes_help#surface_water
+#
+# This information includes the following fields:
+#
+#  agency_cd    Agency Code
+#  station_nm   Station Name
+#  site_no      USGS station number
+#  ts_id        TimeSeries ID
+#  parameter_cd Parameter Code
+#  result_dt    Date that the result was taken
+#  result_tz_cd Time datum
+#  result_va    Current value
+#  result_cd    Code to show data quality
+#  result_md    Date the result was modified in the NWIS database
+#
