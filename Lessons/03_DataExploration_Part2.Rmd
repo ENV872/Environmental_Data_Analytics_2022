@@ -1,7 +1,7 @@
 ---
 title: "5: Data Exploration"
-author: "Environmental Data Analytics | Kateri Salk"
-date: "Spring 2021"
+author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
+date: "Spring 2022"
 output: pdf_document
 geometry: margin=2.54cm
 fig_width: 5

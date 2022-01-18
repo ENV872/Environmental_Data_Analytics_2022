@@ -1,7 +1,7 @@
 ---
 title: "Lab 3 - Data Types | Exploring Datasets"
 author: "Environmental Data Analytics | John Fay and Luana Lima "
-date: "02/03/2021"
+date: "Spring 2022"
 output: pdf_document
 ---
 
