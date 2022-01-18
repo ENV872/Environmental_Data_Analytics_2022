@@ -1,0 +1,206 @@
+---
+title: "Lab 3 - Data Types | Exploring Datasets"
+author: "Environmental Data Analytics | John Fay and Luana Lima "
+date: "02/03/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objectives
+1. Discuss and navigate different data types in R
+2. Create, manipulate, and explore datasets
+3. Date objects
+
+## Data Types in R
+R treats objects differently based on their characteristics. For more information, please see: https://www.statmethods.net/input/datatypes.html. 
+
+* **Vectors** 1 dimensional structure that contains elements of the same type.
+
+* **Matrices** 2 dimensional structure that contains elements of the same type.
+
+* **Arrays** Similar to matrices, but can have more than 2 dimensions. We will not delve into arrays in depth.
+
+* **Lists** Ordered collection of elements that can have different modes.
+
+* **Data Frames** 2 dimensional structure that is more general than a matrix. Columns can have different modes (e.g., numeric and factor). When we import csv files into the R workspace, they will enter as data frames.
+
+Define what each new piece of syntax does below (i.e., fill in blank comments). Note that the R chunk has been divided into sections (# at beginning of line, ---- at end)
+```{r}
+# Vectors ----
+vector1 <- c(1,2,5.3,6,-2,4) # numeric vector
+vector1
+vector2 <- c("one","two","three") # character vector
+vector2
+vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
+vector3
+
+vector1[3] # 
+
+# Matrices ----
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2
+matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
+                  dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
+                                  c("un", "deux", "trois", "cat"))) #
+
+matrix1[4, ] #
+matrix1[ , 3] #
+matrix1[c(12, 14)] #
+matrix1[c(12:14)] #
+matrix1[2:4, 1:3] #
+
+cells <- c(1, 26, 24, 68)
+rnames <- c("R1", "R2")
+cnames <- c("C1", "C2") 
+matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
+  dimnames = list(rnames, cnames)) # 
+matrix4
+
+# Lists ---- 
+list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1
+list1[[2]]
+
+# Data Frames ----
+d <- c(1, 2, 3, 4) # What type of vector?
+e <- c("red", "white", "red", NA) # What type of vector?
+f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
+dataframe1 <- data.frame(d,e,f) #
+names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
+
+dataframe1[1:2,] # 
+dataframe1[c("ID","Passed")] # 
+dataframe1$ID
+
+```
+Question: How do the different types of data appear in the Environment tab?
+
+> Answer: 
+
+Question: In the R chunk below, write "dataframe1$". Press `tab` after you type the dollar sign. What happens?
+
+> Answer: 
+
+
+
+
+### Coding challenge
+
+Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina. Create two vectors, one representing the high temperature on each of the ten days and one representing the low.
+
+```{r}
+
+```
+
+Now, create two additional vectors that include the ten-day forecast for the high and low temperatures in Celsius. Use a function to create the two new vectors from your existing ones in Fahrenheit.
+
+```{r}
+
+```
+
+Combine your four vectors into a data frame and add informative column names.
+
+```{r}
+
+```
+
+Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
+
+```{r}
+
+```
+
+### Date objects
+
+Remember formatting of dates in R: 
+
+%d  day as number (0-31)
+%m  month (00-12, can be e.g., 01 or 1)
+%y  2-digit year
+%Y  4-digit year
+%a  abbreviated weekday
+%A  unabbreviated weekday
+%b  abbreviated month
+%B  unabbreviated month
+
+```{r}
+# Adjust date formatting for today
+# Write code for three different date formats. 
+# An example is provided to get you started.
+# (code must be uncommented)
+today <- Sys.Date()
+format(today, format = "%B")
+#format(today, format = "")
+#format(today, format = "")
+#format(today, format = "")
+
+```
+
+
+### Package lubridate
+
+Install and load the package lubridate into your R session. Lubridate offers fast and user friendly parsing of date-time data. Create a string for today's data and then convert it to R date object using lubridate.
+
+More info on lubridate [here][https://cran.r-project.org/web/packages/lubridate/lubridate.pdf].
+
+```{r DateExercise1}
+#install.packages("lubridate")
+library(lubridate)
+
+#Ex1
+str_today <- "2021-feb-3"
+#Since the format is year-month-day we will use function ymd()
+date_obj_today <- ymd(str_today)
+date_obj_today
+
+#Ex2
+str_today <- "21-feb-3"
+#Sine the format is year-month-day we will use function ymd()
+date_obj_today <- ymd(str_today)
+date_obj_today
+
+#there are other similar functions ydm(), mdy(), etc
+```
+
+```{r DateExercise2}
+#century issue
+str_past <- "55-feb-3"
+date_obj_past <- ymd(str_past)
+date_obj_past
+
+#Build a function to fix year that is more general than the one discussed in the lesson
+fix.early.dates <- function(d, cutoff) {
+       m <- year(d) %% 100  #operator %% is a modular division i.e. integer-divide year(d) by 100 and returns the remainder 
+       year(d) <- ifelse(m > cutoff, 1900+m, 2000+m)  #this will update year(d), year() is a function that returns the year for a data object
+       return(d)
+}
+
+fixed_date_obj_past <- fix.early.dates(date_obj_past,cutoff=21) #cutoff could be the current year to be more general or any other depending on data set 
+fixed_date_obj_past
+```
+
+```{r centuryfix}
+#Fix for century issue
+str_past <- "55-feb-3"
+#Alternative 1
+date_obj_past <- fast_strptime(str_past,"%y-%b-%d",cutoff_2000=21L)
+date_obj_past
+
+#Alternative 2
+date_obj_past2 <- parse_date_time2(str_past,"ymd",cutoff_2000=21L)
+date_obj_past2
+
+#Functions ymd(), mdy(), ydm() do not take argument cutoff_2000
+```
+
+In some cases when dates are provided as integers, you may need to provide an origin for your dates. For example, excel date could be given as number of days since an origin date. Origin date can be different. When R looks at dates as integers, its origin is January 1, 1970. Check if that is true on your machine. 
+
+```{r dateorigin}
+#Check if "1970-01-01" is your origin date.
+lubridate::origin
+
+```
