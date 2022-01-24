@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Kaitlyn Elliott"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -31,12 +31,13 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 4. Insert comments in your code to describe what you are doing.
 
 ```{r}
-#1. 
-
+#1.
+sequence_1_100 <- seq(1,100,4) #sequence of numbers from 1-100 counting by fours
 #2. 
-
+mean_sequence <- mean(sequence_1_100) #average of sequence 
+median_sequence <- median(sequence_1_100) #median of sequence
 #3. 
-
+mean_sequence > median_sequence
 ```
 
 ## Basics Day 2
@@ -50,21 +51,32 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
+name_of_students<-c("Kaitlyn", "Jeff", "Hannah", "Issiah") #character
+test_scores<- c(90, 95, 86, 70) #numeric
+passed_test<-c(TRUE, TRUE, TRUE, TRUE) #logical
+
+data_frame_test_data<- data.frame(name_of_students,test_scores,passed_test) #I think I labeled my columns with informative titles in the steps above
+
 
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: 
+> Answer: This data frame is different than a matrix because it can store different vector types all in one, while a matrix is only one data type.
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
+#function_passed_test<- function(grade) {if (grade>49){print (TRUE)} else {print (FALSE)}}
+#function_passed_test(test_scores$)
+function_passed_test<- function(grade) {ifelse (grade>49, TRUE, FALSE)}
+data_frame_test_data$function_passed_test<- 
+(function_passed_test(data_frame_test_data$test_scores))
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: 
+> Answer: ifelse worked much better because it is meant for vectors, if and else could work if I used another function with it like apply().
