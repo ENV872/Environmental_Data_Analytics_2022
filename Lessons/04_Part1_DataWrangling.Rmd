@@ -1,0 +1,200 @@
+---
+title: "4: Part 1 - Data Wrangling"
+author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
+date: "Spring 2021"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Objectives
+1. Describe the usefulness of data wrangling and its place in the data pipeline
+2. Wrangle datasets with dplyr functions
+3. Apply data wrangling skills to a real-world example dataset
+
+## Set up your session
+
+Today we will work with a dataset from the [North Temperate Lakes Long-Term Ecological Research Station](https://lter.limnology.wisc.edu/about/overview). The NTL-LTER is located in the boreal zone in northern Wisconsin, USA. We will use the [chemical and physical limnology dataset](https://lter.limnology.wisc.edu/content/cascade-project-north-temperate-lakes-lter-core-data-physical-and-chemical-limnology-1984), running from 1984-2016. 
+
+Opening discussion: why might we be interested in long-term observations of temperature, oxygen, and light in lakes?
+
+> Add notes here: 
+
+```{r, message = FALSE}
+getwd()
+#install.packages(tidyverse)
+library(tidyverse)
+#install.packages(lubridate)
+library(lubridate)
+NTL.phys.data <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv", stringsAsFactors = TRUE)
+
+colnames(NTL.phys.data)
+head(NTL.phys.data)
+summary(NTL.phys.data)
+str(NTL.phys.data)
+dim(NTL.phys.data)
+
+class(NTL.phys.data$sampledate)
+# Format sampledate as date
+NTL.phys.data$sampledate <- as.Date(NTL.phys.data$sampledate, format = "%m/%d/%y")
+```
+
+## Data Wrangling
+
+Data wrangling extends data exploration: it allows you to process data in ways that are useful for you. An important part of data wrangling is creating *tidy datasets*, with the following rules: 
+
+1. Each variable has its own column
+2. Each observation has its own row
+3. Each value has its own cell
+
+What is the best way to wrangle data? There are multiple ways to arrive at a specific outcome in R, and we will illustrate some of those approaches. Your goal should be to write the simplest code that will get you to your desired outcome. However, there is sometimes a trade-off of the opportunity cost to learn a new formulation of code and the time it takes to write complex code that you already know. Remember that the best code is one that is easy to understand for yourself and your collaborators. Remember to comment your code, use informative names for variables and functions, and use reproducible methods to arrive at your output.
+
+## Dplyr Wrangling Functions
+
+`dplyr` is a package in R that includes functions for data manipulation (i.e., data wrangling or data munging). `dplyr` is included in the tidyverse package, so you should already have it installed on your machine. The functions act as verbs for data wrangling processes. For more information, run this line of code:
+
+```{r, results = "hide"}
+vignette("dplyr")
+```
+
+### Filter
+
+Filtering allows us to choose certain rows (observations) in our dataset.
+
+Here are the relevant commands used in the `filter` function. Add some notes to designate what these commands mean. 
+`==`
+`!=`
+`<`
+`<=`
+`>`
+`>=`
+`&`
+`|`
+
+```{r}
+class(NTL.phys.data$lakeid)
+class(NTL.phys.data$depth)
+
+# matrix filtering
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+
+# dplyr filtering
+NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
+NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
+
+# Did the methods arrive at the same result?
+head(NTL.phys.data.surface1)
+dim(NTL.phys.data.surface1)
+head(NTL.phys.data.surface2)
+dim(NTL.phys.data.surface2)
+head(NTL.phys.data.surface3)
+dim(NTL.phys.data.surface3)
+
+# Choose multiple conditions to filter
+summary(NTL.phys.data$lakename)
+NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
+                                     lakename != "Crampton Lake" & lakename != "East Long Lake" &
+                                     lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
+                                     lakename != "Ward Lake" & lakename != "West Long Lake")
+NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
+
+# Choose a range of conditions of a numeric or integer variable
+summary(NTL.phys.data$daynum)
+NTL.phys.data.JunethruOctober1 <- filter(NTL.phys.data, daynum > 151 & daynum < 305)
+NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305)
+NTL.phys.data.JunethruOctober3 <- filter(NTL.phys.data, daynum >= 152 & daynum <= 304)
+NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
+
+# Exercise: 
+# filter NTL.phys.data for the year 1999
+# what code do you need to use, based on the class of the variable?
+class(NTL.phys.data$year4)
+
+# Exercise: 
+# filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
+
+
+```
+Question: Why don't we filter using row numbers?
+
+> Answer: 
+
+### Arrange
+
+Arranging allows us to change the order of rows in our dataset. By default, the arrange function will arrange rows in ascending order.
+
+```{r}
+NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth)
+NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
+
+# Exercise: 
+# Arrange NTL.phys.data by temperature, in descending order. 
+# Which dates, lakes, and depths have the highest temperatures?
+
+
+```
+### Select
+
+Selecting allows us to choose certain columns (variables) in our dataset.
+
+```{r}
+NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
+
+```
+### Mutate
+
+Mutating allows us to add new columns that are functions of existing columns. Operations include addition, subtraction, multiplication, division, log, and other functions.
+
+```{r}
+
+NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
+
+```
+
+## Lubridate
+
+A package that makes coercing date much easier is `lubridate`. A guide to the package can be found at https://lubridate.tidyverse.org/. The cheat sheet within that web page is excellent too. This package can do many things (hint: look into this package if you are having unique date-type issues), but today we will be using two of its functions for our NTL dataset. 
+
+```{r}
+# add a month column to the dataset
+NTL.phys.data.PeterPaul1 <- mutate(NTL.phys.data.PeterPaul1, month = month(sampledate)) 
+
+# reorder columns to put month with the rest of the date variables
+NTL.phys.data.PeterPaul1 <- select(NTL.phys.data.PeterPaul1, lakeid:daynum, month, sampledate:comments)
+
+# find out the start and end dates of the dataset
+interval(NTL.phys.data.PeterPaul1$sampledate[1], NTL.phys.data.PeterPaul1$sampledate[21613])
+interval(first(NTL.phys.data.PeterPaul1$sampledate), last(NTL.phys.data.PeterPaul1$sampledate))
+```
+
+
+## Pipes
+
+Sometimes we will want to perform multiple functions on a single dataset on our way to creating a processed dataset. We could do this in a series of subsequent functions or create a custom function. However, there is another method to do this that looks cleaner and is easier to read. This method is called a pipe. We designate a pipe with `%>%`. A good way to think about the function of a pipe is with the word "then." 
+
+Let's say we want to take our raw dataset (NTL.phys.data), *then* filter the data for Peter and Paul lakes, *then* select temperature and observation information, and *then* add a column for temperature in Fahrenheit: 
+
+```{r}
+NTL.phys.data.processed <- 
+  NTL.phys.data %>%
+  filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
+  select(lakename, sampledate:temperature_C) %>%
+  mutate(temperature_F = (temperature_C*9/5) + 32)
+  
+```
+
+Notice that we did not place the dataset name inside the wrangling function but rather at the beginning.
+
+### Saving processed datasets
+
+```{r}
+write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+```
+
+## Closing Discussion
+
+When we wrangle a raw dataset into a processed dataset, we create a code file that contains only the wrangling code. We then save the processed dataset as a new spreadsheet and then create a separate code file to analyze and visualize the dataset. Why do we keep the wrangling code separate from the analysis code?
+
+
