@@ -46,13 +46,13 @@ matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
-                                  c("un", "deux", "trois", "cat"))) #
+                                  c("un", "deux", "trois", "cat"))) #names of rows then name of columns 
 
-matrix1[4, ] #
-matrix1[ , 3] #
-matrix1[c(12, 14)] #
-matrix1[c(12:14)] #
-matrix1[2:4, 1:3] #
+matrix1[4, ] # row
+matrix1[ , 3] # coloumn
+matrix1[c(12, 14)] # 12th and 14th value
+matrix1[c(12:14)] #12 through 14th value
+matrix1[2:4, 1:3] #row2-4 and columns 1-3
 
 cells <- c(1, 26, 24, 68)
 rnames <- c("R1", "R2")
@@ -94,24 +94,33 @@ Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina.
 
 ```{r}
 
+durham_high_temp_f<-c(45,50,36,43,50,54,57,66,59,43)
+
+durham_low_temp_f<-c(9,27,19,16,25,27,34,48,37,25)
 ```
 
 Now, create two additional vectors that include the ten-day forecast for the high and low temperatures in Celsius. Use a function to create the two new vectors from your existing ones in Fahrenheit.
 
 ```{r}
+durham_high_temp_c<-function(t)(t-32)*5/9
+durham_low_temp_c<-function(t)(t-32)*5/9
+low_temp_c<-durham_low_temp_c(durham_low_temp_f)
+high_temp_c<-durham_high_temp_c(durham_high_temp_f)
 
 ```
 
 Combine your four vectors into a data frame and add informative column names.
 
 ```{r}
-
+durham_temps<-data.frame(durham_high_temp_f,durham_low_temp_f,low_temp_c,high_temp_c)
 ```
 
 Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
 
 ```{r}
+summary(durham_temps)
 
+sd(durham_temps$durham_high_temp_f)
 ```
 
 ### Date objects

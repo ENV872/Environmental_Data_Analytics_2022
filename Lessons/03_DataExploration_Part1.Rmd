@@ -143,7 +143,7 @@ length(USGS.flow.data)
 head(USGS.flow.data)
 head(USGS.flow.data, 10)
 tail(USGS.flow.data, 5)
-USGS.flow.data[30000:30005, c(3, 8, 14)]
+USGS.flow.data[30000:30005, c(3, 8, 14)] # shows the rows 30000-30005 and only colums 3,8 and 14
 
 class(USGS.flow.data$datetime)
 class(USGS.flow.data$discharge.mean)
