@@ -1,7 +1,7 @@
 ---
 title: "Lab 4: Data Wrangling"
 author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
-date: "Spring 2021"
+date: "Spring 2022"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
