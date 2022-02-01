@@ -47,6 +47,7 @@ matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
                                   c("un", "deux", "trois", "cat"))) #
+matrix3
 
 matrix1[4, ] #
 matrix1[ , 3] #
@@ -75,6 +76,7 @@ names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) #
 dataframe1[1:2,] # 
 dataframe1[c("ID","Passed")] # 
 dataframe1$ID
+
 
 ```
 Question: How do the different types of data appear in the Environment tab?
@@ -134,8 +136,8 @@ Remember formatting of dates in R:
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%y")
+format(today, format = "%m-%d-%Y")
 #format(today, format = "")
 
 ```
@@ -187,11 +189,11 @@ fixed_date_obj_past
 #Fix for century issue
 str_past <- "55-feb-3"
 #Alternative 1
-date_obj_past <- fast_strptime(str_past,"%y-%b-%d",cutoff_2000=21L)
+date_obj_past <- fast_strptime(str_past,"%y-%b-%d",cutoff_2000=22L)
 date_obj_past
 
 #Alternative 2
-date_obj_past2 <- parse_date_time2(str_past,"ymd",cutoff_2000=21L)
+date_obj_past2 <- parse_date_time2(str_past,"ymd",cutoff_2000=22L)
 date_obj_past2
 
 #Functions ymd(), mdy(), ydm() do not take argument cutoff_2000
