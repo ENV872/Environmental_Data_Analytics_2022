@@ -1,7 +1,9 @@
 ---
-title: "Assignment 1: Introduction"
-author: "Student Name"
-output: pdf_document
+title: 'Assignment 1: Introduction'
+author: "Kelsie Roberton"
+output:
+  pdf_document: default
+  word_document: default
 geometry: margin=2.54cm
 ---
 
@@ -22,21 +24,20 @@ The completed exercise is due on <>.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: No formal training with R. However, I have used Git for a past class and Python. I still need more time to exercise my coding skills. The only data analytics software I feel the most comfortable in is Excel.
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: Reading the data and drawing conclusions based on the information provided. 
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
-
+> Answer: The ability to write R code language that will be recognized for the system to perform the function I want it do. In Python, I often struggled to understand what string of code I needed to write for the software to understand what I wanted it to do. Additionally, Python was finicky with spacing and symbols. I would tend to miss a set of quotation marks or commas that would initiate the code to run. 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/kroberton/Environmental_Data_Analytics_2022
 
 

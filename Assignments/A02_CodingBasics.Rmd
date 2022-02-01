@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Kelsie Roberton"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -31,12 +31,18 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 4. Insert comments in your code to describe what you are doing.
 
 ```{r}
-#1. 
+#1
+seq(1, 100)
+seq(1,100,4) # from, to, by
+simplesequence <-seq(1,100,4)
 
 #2. 
-
-#3. 
-
+mean(simplesequence)
+median(simplesequence)
+#3. conditional statement
+mean(simplesequence)>median(simplesequence)
+mean(simplesequence)==median(simplesequence)
+#4 > can tell me if the first value is greater than the second value in the code chunk. == (equality) can help me check whether two objects are equal to each other.
 ```
 
 ## Basics Day 2
@@ -50,21 +56,46 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
-
+students <- c( "jerry", "samantha", "cary", "simon", "dan")
+total_test_score <- c(100)
+jerry_testscore <- c(79) #grade for the first student
+samantha_testscore <- c(82) #grade for the second student
+cary_testscore <- c(96) #grade for the third student
+simon_testscore <- c(71) #grade for the fourth student
+dan_testscore <- c(88) #grade for the fifth student
+if (simon_testscore > 50) {
+  assign_what <- "PASS"
+} else {
+  assign_what <- "FAIL"
+}
+assign_what
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: 
+> Answer: Matrices can only contain a single class of data, while data frames can consist of many different classes of data 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
-
+if (jerry_testscore > 50) {
+  assign_what <- "PASS"
+} else if (samantha_testscore > 50){
+  assign_what <-"PASS"
+} else if (cary_testscore > 50){
+  assign_what <-"PASS"
+} else if (simon_testscore> 50){
+  assign_what <-"PASS"
+}else if (dan_testscore>50){
+  assign_what <-"PASS"
+} else {
+  assign_what <- "FAIL"
+}
+assign_what
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: 
+> Answer: An 'if' statement is used to execute a block of code if the specified condition is true. An 'else' statement is used to execute a block of code if the statement is false. The ifelse() is a conditional statement that allows the application to test a series of conditions in a prescribed order. In this function, I used all three code statements to execute what the assigned answer to the code would be if the test score was more or less than a test score of 50. 
