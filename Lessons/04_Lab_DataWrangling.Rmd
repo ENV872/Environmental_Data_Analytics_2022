@@ -57,10 +57,14 @@ NTL.phys.data.JunethruOctober <- filter(NTL.phys.data, daynum %in% c(152:304))
 # Exercise 1: 
 # filter NTL.phys.data for the year 1999
 # what code do you need to use, based on the class of the variable?
+NTL.phys.data.1999<-filter(NTL.phys.data, year4 %in% 1999)
 
 
 # Exercise 2: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
+
+tuesdaylake.phys.data<-filter(NTL.phys.data, lakename == "Tuesday Lake" & year4 %in% (1990:1999))
+  
 
 
 ```
@@ -94,7 +98,7 @@ NTL.phys.data.processed <-
 
 ## Gather and Spread
 
-For gather we will use `pivot_longer` and for spread we will use `pivot_wider`.
+For gather we will use `pivot_longer` and for spread we will use `pivot_wider`
 
 ```{r}
 #Exercise 5: gather irradiance data (measured in the water column and measured on the deck of the sampling boat) into one column using pivot_longer

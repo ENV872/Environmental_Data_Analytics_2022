@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Kaitlyn Elliott Section 4"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -23,10 +23,31 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 2. Explore the dimensions, column names, and structure of the datasets. 
 
-```{r, message = FALSE}
+```{r message=FALSE}
 #1
-
+getwd()
+setwd('C:/Users/15408/Documents/Environmental_Data_Analytics_2022/')
+library("tidyverse")
+library('lubridate')
+nc_ozone_2018<-read.csv('C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Raw/EPAair_O3_NC2018_raw.csv')
+nc_ozone_2019<-read.csv('C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Raw/EPAair_O3_NC2019_raw.csv')
+nc_pm25_2018<-read.csv('C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Raw/EPAair_PM25_NC2018_raw.csv')
+nc_pm25_2019<-read.csv('C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Raw/EPAair_PM25_NC2019_raw.csv')
+#I had to write the files this way because every time I set my working directory it immediately changes to a different one
 #2
+dim(nc_ozone_2018)
+dim(nc_ozone_2019)
+dim(nc_pm25_2018)
+dim(nc_pm25_2019)
+colnames(nc_ozone_2018)
+colnames(nc_ozone_2019)
+colnames(nc_pm25_2018)
+colnames(nc_pm25_2019)
+head(nc_ozone_2018)
+head(nc_ozone_2019)
+head(nc_pm25_2018)
+head(nc_pm25_2019)
+
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -37,12 +58,36 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 ```{r}
 #3
+nc_ozone_2019$Date<-as.Date(nc_ozone_2019$Date, '%m/%d/%Y' )
+nc_ozone_2018$Date<-as.Date(nc_ozone_2018$Date, '%m/%d/%Y' )
+nc_pm25_2018$Date<-as.Date(nc_pm25_2018$Date, '%m/%d/%Y')
+nc_pm25_2019$Date<-as.Date(nc_pm25_2019$Date,'%m/%d/%Y')
 
 #4
+nc_ozone_2018<-nc_ozone_2018 %>%
+  select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+nc_ozone_2019<-nc_ozone_2019 %>%
+  select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+nc_pm25_2018<-nc_pm25_2018 %>%
+  select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+
+nc_pm25_2019<-nc_pm25_2019%>%
+  select(Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
+nc_pm25_2018$AQS_PARAMETER_DESC<-rep('PM 2.5', 8983)
+nc_pm25_2019$AQS_PARAMETER_DESC<-rep('PM 2.5', 8581)
 
 #6
+write.csv(nc_ozone_2018, row.names = FALSE, file= 'C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Processed/EPAair_O3_NC2018_processed.csv')
+
+write.csv(nc_ozone_2019, row.names = FALSE, file= 'C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Processed/EPAair_O3_NC2019_processed.csv')
+
+write.csv(nc_pm25_2018, row.names = FALSE, file= 'C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Processed/EPAair_pm25_NC2018_processed.csv')
+
+write.csv(nc_pm25_2019, row.names = FALSE, file= 'C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Processed/EPAair_pm25_NC2019_processed.csv')
 
 ```
 
@@ -62,14 +107,25 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 ```{r}
 #7
+combined_nc_air_quality<-rbind(nc_ozone_2018, nc_ozone_2019, nc_pm25_2018, nc_pm25_2019)
 
 #8
+revised_nc_air_quality<-combined_nc_air_quality %>%
+  filter(Site.Name %in% c("Linville Falls", "Durham Armory", "Leggett", "Hattie Avenue", "Clemmons Middle", "Mendenhall School", "Frying Pan Mountain", "West Johnston Co.", "Garinger High School", "Castle Hayne", "Pitt Agri. Center", "Bryson City", "Millbrook School")) %>%
+  group_by(Date, Site.Name, COUNTY, AQS_PARAMETER_DESC) %>%
+  summarise(mean_AQI=mean(DAILY_AQI_VALUE), mean_long=mean(SITE_LONGITUDE), mean_lat=mean(SITE_LATITUDE)) %>%
+  mutate(month=month(Date), year=year(Date))
 
 #9
-
+seperate_o3_pm25_nc_airqual<-revised_nc_air_quality %>%
+  spread(AQS_PARAMETER_DESC, mean_AQI)
 #10
+dim(seperate_o3_pm25_nc_airqual)
 
 #11
+
+write.csv(seperate_o3_pm25_nc_airqual, row.names = FALSE, file = 'C:/Users/15408/Documents/Environmental_Data_Analytics_2022/Data/Processed/EPAair_O3_PM25_NC2122_Processed.csv')
+
 
 ```
 
@@ -84,9 +140,13 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 ```{r}
 #12(a,b)
-
+summarized_nc_air<-seperate_o3_pm25_nc_airqual %>%
+  group_by(Site.Name, month, year) %>%
+  summarise(mean_ozone=mean(Ozone), mean_pm25=mean(`PM 2.5`)) %>%
+  filter(!(is.na(mean_ozone) & is.na(mean_pm25)))
 
 #13
+dim(summarized_nc_air)
 
 ```
 
