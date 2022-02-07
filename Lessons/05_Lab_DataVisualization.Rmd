@@ -1,0 +1,121 @@
+---
+title: "5: Lab - Data Visualization Basics"
+author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
+date: "Spring 2022"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Objectives
+1. Answer questions on M4/A4
+2. Answer questions on M5 videos
+3. Additional comments on videos - expression() and saving plot
+4. Perform simple data visualizations in the R package `ggplot`
+
+## Expression function and Saving plots
+
+The expression function can be used when you want to add mathematical symbols and subscripts mixed with regular letter to labels. 
+
+```{r}
+Plot_text <-
+ggplot(data=data.frame(x=0,y=0))+
+  geom_point(aes(x=x,y=y)) +
+  geom_text(x=0,y=0.025,label=expression(paste("Mean is ", mu,",", R^{2},'=0.6')))
+print(Plot_text)
+
+ggsave("./Output/Plot_text.jpg",Plot_text, height = 4, width = 6, units = "in", dpi = 300)
+
+```
+
+## Import Datasets
+
+```{r, message = FALSE, warning = FALSE}
+getwd()
+library(tidyverse)
+library(ggridges)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+
+PeterPaul.chem.nutrients <- 
+  read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
+EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv", stringsAsFactors = TRUE)
+
+EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
+PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+
+```
+
+
+## Plotting continuous variables over time: Scatterplot and Line Plot
+
+Exercise: build your own scatterplots of PeterPaul.chem.nutrients
+
+```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+
+# 1. 
+# Plot surface temperatures by day of  year. 
+# Color your points by year, and facet by lake in two rows.
+# Change the ylab name
+
+
+#2. 
+# Plot temperature by date. Color your points by depth.
+# Change the size of your point to 0.5
+# Change the color palette to magma and play with direction (+- 1), which one makes more sense?
+# Change x axis to include marker/labels every 5 years
+
+
+
+
+```
+## Plotting the relationship between two continuous variables: Scatterplot
+
+Exercise: Plot relationships between air quality measurements
+
+```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+
+# 3. 
+# Plot AQI values for ozone by PM2.5, colored by latitude 
+# Make the points 50 % transparent
+# Add a line of best fit for the linear regression of these variables.
+
+
+
+
+```
+
+## Plotting continuous vs. categorical variables
+
+Exercise: Plot distributions of AQI values for EPAair.
+
+```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+
+# 4. 
+# Create several types of plots depicting PM2.5, divided by year. 
+# Choose which plot displays the data best and justify your choice. 
+
+
+
+```
+
+
+## Visualization challenge
+
+The following graph displays the counts of specific endpoints measured in neonicotinoid ecotoxicology studies. The way it is visualized, however, is not effective. Make the following coding changes to improve the graph: 
+
+1. Change the ordering of the "Endpoint" factor (function: `reorder`) so that the highest counts are listed first (hint: FUN = length)
+2. Plot the barplot with the reordered factor levels. Add this line of code to make the bars show up left to right:   scale_x_discrete(limits = rev(levels(Neonics$Endpoint)))
+3. Adjust the x axis labels so they appear at a 45 degree angle. 
+4. Change the color and/or border on the bars. Should you have a consistent color across all bars, or a different color for each bar?
+```{r}
+
+Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
+ggplot(Neonics) +
+  geom_bar(aes(x = Endpoint))
+
+
+
+```
