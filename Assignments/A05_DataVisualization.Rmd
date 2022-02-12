@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Kaitlyn Elliott Section 4"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,8 +33,16 @@ the processed data file for the Niwot Ridge litter dataset (use the [`NEON_NIWO_
 
 ```{r}
 #1 
+getwd()
+library(tidyverse)
+library(cowplot)
+ntl_lter_peter_paul_chemistry<-read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
+niwot_litter_prodessed<-read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2 
+ntl_lter_peter_paul_chemistry$sampledate<-as.Date(ntl_lter_peter_paul_chemistry$sampledate)
+niwot_litter_prodessed$collectDate<-as.Date(niwot_litter_prodessed$collectDate)
 
 ```
 ## Define your theme
@@ -42,7 +50,10 @@ the processed data file for the Niwot Ridge litter dataset (use the [`NEON_NIWO_
 
 ```{r}
 #3
-
+theme_groovy<-theme_classic(base_size = 12) +
+  theme(axis.text = element_text(color = "orange"), 
+        legend.position = "right")
+theme_set(theme_groovy)
 ```
 
 ## Create graphs
@@ -52,20 +63,39 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r}
 #4
-
+ggplot(ntl_lter_peter_paul_chemistry, aes(x=tp_ug, y=po4, color=lakename))+
+  geom_point()+
+  ylim(-5,60)+geom_smooth(method="lm", se=FALSE, color="black", aes(x=tp_ug, y=po4))+
+  labs(title="Relationship between Total Phosphorus and Phosphate", color="Lake Name")+
+  ylab("Phosphate (PO4)")+xlab("Total Phosphate")
 ```
 
 
 5. [NTL-LTER] Make three separate boxplots of (a) temperature, (b) TP, and (c) TN, with month as the x axis and lake as a color aesthetic. Then, create a cowplot that combines the three graphs. Make sure that only one legend is present and that graph axes are aligned.
 
-```{r}
+```{r message=FALSE, paged.print=FALSE}
 #5
+ntl_lter_peter_paul_chemistry$month<-as.factor(ntl_lter_peter_paul_chemistry$month)
+
+temp_plot<-ggplot(ntl_lter_peter_paul_chemistry,aes(x=month,y=temperature_C, color=lakename))+
+  geom_boxplot()+labs( color="Lake Name")+ylab("Temperature (C)")+xlab("Month")+
+  theme(legend.position = "none")
+
+tp_plot<-ggplot(ntl_lter_peter_paul_chemistry,aes(x=month,y=tp_ug,color=lakename))+
+  geom_boxplot()+ylab("TP")+xlab("Month")+theme(legend.position = "none")
+
+tn_plot<-ggplot(ntl_lter_peter_paul_chemistry,aes(x=month,y=tn_ug,color=lakename))+
+  geom_boxplot()+ylab("TN")+xlab("Month")+
+  labs(title = "Temperature, TP and TN by Month", color="Lake Name")+
+  theme(legend.position = "top")
+
+plot_grid(tn_plot,temp_plot,tp_plot, nrow=3, align = "h", rel_heights = c(1.75,1,1))
 
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: Peter lake tends to have more nitrogen than Paul lake throughout the year. In both lakes you can see a seasonal temperature change with July and August being the warmest months and Paul lake is slightly warmer on average. I don't notice much of a seasonal differene in TN and TP, except for it slightly increases from May until September. 
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
@@ -73,11 +103,20 @@ Question: What do you observe about the variables of interest over seasons and b
 
 ```{r}
 #6
+ggplot(subset(niwot_litter_prodessed, functionalGroup== "Needles"), 
+  aes(x=collectDate, y=dryMass, color=nlcdClass))+geom_point()+
+  labs(title="Needle Dry Mass Over Time", color="NLCD Class")+
+  ylab("Dry Mass (g)")+xlab("Date")
 
 #7
+ggplot(subset(niwot_litter_prodessed, functionalGroup== "Needles"), 
+       aes(x=collectDate, y=dryMass))+geom_point()+
+  labs(title="Needle Dry Mass Over T4ime")+ylab("Dry Mass (g)")+xlab("Date")+
+  facet_wrap(vars(nlcdClass), nrow=3)
 
 
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
 > Answer:
+I think 7 is more effective because the data is less crowded together and its easier to see the differences between the categories when they are not overlapping eachother. 
