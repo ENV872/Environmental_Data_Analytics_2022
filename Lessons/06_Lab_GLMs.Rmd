@@ -1,0 +1,201 @@
+---
+title: "6: Part 1 - Generalized Linear Models"
+author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
+date: "Spring 2022"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Objectives
+1. Answer questions on M5/A5
+2. Answer questions on M6 - GLMs
+3. Additional comments on videos - t-test
+4. Practice more application GLM to real datasets
+
+
+## Set up
+```{r, message = FALSE}
+library(tidyverse)
+library(agricolae)   
+
+PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
+# Set date to date format
+PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+
+EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv", stringsAsFactors = TRUE)
+# Set date to date format
+EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
+
+
+Litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv", stringsAsFactors = TRUE)
+# Set date to date format
+Litter$collectDate <- as.Date(Litter$collectDate , format = "%Y-%m-%d")
+
+# Set theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
+```
+
+## T-Test
+
+Continuous response, one categorical explanatory variable with two categories (or comparison to a single value if a one-sample test).
+
+### Formulating Hypothesis for µ
+
+Two hypotheses are formed – the null hypothesis and the alternative hypothesis.
+The null hypothesis and the alternative hypothesis combine to cover all possible values for the population mean.
+The null hypothesis must have the equality.
+The null and alternative hypotheses are always stated in terms of the population mean (mu).
+
+### One-sample t-test
+The object of a one sample test is to test the null hypothesis that the mean of the group is equal to a specific value. For example, we might ask ourselves (from the EPA air quality processed dataset): 
+
+Function t.test()
+**x**	a (non-empty) numeric vector of data values.
+**alternative** a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+**mu** a number indicating the true value of the mean (or difference in means if you are performing a two sample test).
+**formula** a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
+
+
+Are Ozone levels below the threshold for "good" AQI index (0-50)?
+
+
+> Exercise 1: State the hypotheses for testing mean of AQI index.
+
+> Answer: 
+
+
+```{r}
+
+
+summary(EPAair$Ozone)
+EPAair.subsample <- sample_n(EPAair, 5000)
+
+# Evaluate assumption of normal distribution
+shapiro.test((EPAair.subsample$Ozone))
+ggplot(EPAair, aes(x = Ozone)) +
+  geom_histogram() 
+qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
+
+O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
+O3.onesample
+
+Ozone.plot <- ggplot(EPAair, aes(x = Ozone)) +
+  #geom_density(stat = "count", fill = "gray") +
+  geom_density(fill = "gray") +
+  geom_vline(xintercept = 50, color = "#238b45", lty = 2, size = 0.9) +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
+print(Ozone.plot)
+```
+
+Write a sentence or two about the results of this test. Include both the results of the test and an interpretation that puts the findings in context of the research question.
+
+> 
+
+### Two-sample t-test
+
+The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between 2018 and 2019?
+
+```{r}
+shapiro.test(EPAair$Ozone[EPAair$Year == 2018])
+shapiro.test(EPAair$Ozone[EPAair$Year == 2019])
+
+#p-value less than 0.05 then reject null for 2018 and 2019 i.e. data do not follow normal distribution
+
+#Compare variance using F-test (only)
+var.test(EPAair$Ozone ~ EPAair$Year)
+
+#p-value less than 0.05 then reject null for 2018 and 2019 i.e. true ratio not equal to one
+
+ggplot(EPAair, aes(x = Ozone, color = as.factor(Year))) +
+  geom_freqpoly()
+
+# Format as a t-test
+O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Year)
+O3.twosample
+O3.twosample$p.value
+
+# Format as a GLM
+O3.twosample2 <- lm(EPAair$Ozone ~ EPAair$Year)
+summary(O3.twosample2)
+
+plot(O3.twosample2)
+
+
+```
+
+
+## Statistical Test: Cheat sheet
+
+**F-test:** Compare the variances of two groups. The data must be normally distributed.
+
+**Bartlett’s test:** Compare the variances of two or more groups. The data must be normally distributed.
+
+**Shapiro.test:** check for normality
+
+**One-sample t-test:** check if mean is equal/less/greater to specific value, single variable
+
+**Two-sample t-test:**  check if mean of two samples is equivalent
+
+### Visualization and interpretation challenge
+
+Create three plots, each with appropriately formatted axes and legends. Choose a non-default color palette.
+
+1. geom_density of ozone divided by year (distinguish between years by adding transparency to the geom_density layer).
+2. geom_boxplot of ozone divided by year . Add letters representing a significant difference between 2018 and 2019 (hint: stat_summary). 
+3. geom_violin of ozone divided by year, with the 0.5 quantile marked as a horizontal line. Add letters representing a significant difference between 2018 and 2019. 
+
+```{r}
+#Exercise 2:
+
+
+```
+
+## Linear Regression
+
+Important components of the linear regression are the correlation and the R-squared value. The **correlation** is a number between -1 and 1, describing the relationship between the variables. Correlations close to -1 represent strong negative correlations, correlations close to zero represent weak correlations, and correlations close to 1 represent strong positive correlations. The **R-squared value** is the correlation squared, becoming a number between 0 and 1. The R-squared value describes the percent of variance accounted for by the explanatory variables. 
+
+For the NTL-LTER dataset, can we predict PM2.5 from Ozone?
+
+```{r}
+
+#Exercise 3: Run a linear regression PM2.5 by Ozone. Find the p-value and R-squared value. 
+
+
+
+#Exercise 4: Build a scatterplot. Add a line and standard error for the linear regression. 
+
+
+
+```
+
+
+## AIC to select variables
+
+What other variables can we add to improve model?
+
+```{r}
+
+#Exercise 5: Build correlation plots and identify more possible explanatory variables to add to the regression.
+
+
+
+
+#Exercise 6: Choose a model by AIC in a Stepwise Algorithm. Do the results from AIC match the variables you selected on Exercise 5?
+
+
+
+
+#Exercise 7: Run another regression using the variables selected on Exercise 6. Compare r-squared value with the one from Exercise 5. 
+
+```
+
+
+
+
+
+
