@@ -69,7 +69,6 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 
 
 
-
 ```
 ## Plotting the relationship between two continuous variables: Scatterplot
 
