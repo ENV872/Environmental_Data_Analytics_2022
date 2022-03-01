@@ -55,7 +55,7 @@ The `sf` package enables a new data type to be included in our data frames - the
 
 These geometries represent features located in geographic space. (There are other geometry types, with a full set listed [here](https://bit.ly/3hrPcZO). However, to keep things simple, we'll focus on points, lines, and polygons.)
 
-![Figure 1. Spatial features represented as points, lines, and polygons.](../lessons/img/vector_mode.jpg)
+![Figure 1. Spatial features represented as points, lines, and polygons.](img/vector_mode.jpg)
 ## 2.4 Coordinate reference systems (crs)
 A **coordinate reference system** or **crs** includes the information used to reference the coordinates used in defining a geometry with actual geographic locations. These will be discussed more later. 
 
