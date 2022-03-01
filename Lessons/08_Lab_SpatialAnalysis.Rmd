@@ -1,0 +1,185 @@
+---
+title: "Spatial Analysis in R - Lab exercises"
+author: "Environmental Data Analytics | John Fay & Luana Lima"
+date: "Spring 2022"
+output: pdf_document
+editor_options:
+  chunk_output_type: console
+---
+
+## Objectives
+1. Q&A on A07
+
+2. Q&A on M08 Recordings/Concepts
+ * What makes data "spatial"?
+ * Why location is important? 
+ * Vector data model: points/lines/polygons
+ * Spatial data structures: sfg, sfc, sf objects
+ * Projections & Coordinate reference systems
+ * Visualization techniques
+
+3. Spatial Analysis Exercises
+ * Reading data into spatial dataframes
+ * Data aggregation
+ * Transforming data from one CRS to another
+ * Spatial operations: spatial selection and intersection
+
+
+# 1. SET UP
+```{r setup}
+#Examine the working directory
+getwd()
+
+#Import libraries
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(mapview)
+library(RColorBrewer)
+```
+
+# 2. ACCESSING SPATIAL DATA
+
+## 2.1 Read tabular data and convert to spatial features
+```{r convert.tabular.data.to.sf.object}
+#Read our EPA points into a spatial dataframe
+epa_pm25_sites_sf <- read_csv('./Data/Raw/EPAair_PM25_NC2018_raw.csv') %>% 
+  group_by(`Site Name`, COUNTY, SITE_LATITUDE, SITE_LONGITUDE) %>% 
+  summarize(
+    meanPM = mean(`Daily Mean PM2.5 Concentration`),
+    maxPM = max(`Daily Mean PM2.5 Concentration`)
+    ) %>% 
+  st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
+
+#Inspect the object
+class(epa_pm25_sites_sf)
+
+#What is its CRS again?
+st_crs(epa_pm25_sites_sf)$epsg
+
+#Plot the data
+mapview(epa_pm25_sites_sf)
+```
+
+## 2.2 Read in and explore NC counties
+
+Below we read in the USA counties shapefile, filtering for just the NC features (NC has a state FIPS code of "37"...). We also see that `sf` plays nice with "tidyverse" syntax (e.g. pipes) and functions (e.g. filter). The `sf` package also includes some new spatial methods for exploring our data (e.g. `st_bbox` which draws a bounding box around all spatial features).
+
+```{r read.filtered.records.from.shapefile.to.sf.object}
+#
+counties_sf<- st_read('./Data/Spatial/cb_2018_us_county_20m.shp') %>% 
+  filter(STATEFP == 37) #Filter for just NC Counties
+
+#
+mapView(counties_sf, zcol = "AWATER")
+```
+
+### EXERCISE 2.2.1: Read in and explore 8-digit HUC watersheds for NC
+
+*Now you try*: Read in the NC 8-Digit HUC dataset: `./Data/Spatial/NCHUC8.shp` into a variable named `huc8_sf`. What CRS does this dataset use? Is it the same as the counties dataset? What columns are included in this dataset? What do these features look like on a map?
+
+```{r read HUCs shapefile}
+#Read the shapefile into an sf dataframe named "huc8_sf"
+
+
+
+#View the data as a map, colored by the acreage in each
+
+
+```
+
+### EXERCISE 2.2.2: Read a subset of data into a spatial dataframe and map it
+
+*Challenge*: Read in the NC 8-Digit HUC dataset again, but this time *filter* the data so the result only includes the one with a SUBBASIN value of 'Upper Neuse'. Then map this. Double bonus if you can map this HUC8 on top of the other HUC8s, showing the Upper Neuse as purple and the others as orange.
+
+```{r Select the Upper Neuse HUC 8}
+#Read the shapefile into an sf dataframe
+
+
+
+#Create a map
+
+
+```
+
+
+# 3. WORKING WITH SPATIAL DATA
+
+## 3.1 Accessing on-line data, attribute joins, & data aggregation
+
+### EXERCISE 3.1.1: Read an online CSV file into a dataframe
+The URL '<https://raw.githubusercontent.com/ENV859/EnviroAtlasData/main/Wind_Energy.csv>' links to EPA's EnviroAtlas data on the amount of wind energy estimated at the HUC12 scale. You need to load this data, group by HUC8 (computing the sum wind energy of each HUC12 in a given HUC8) and join with the HUC 8 spatial features dataset. 
+
+* Be sure you read in the `HUC_12` column as a factor so it doesn't default to a numeric column.
+
+```{r}
+#Compute HUC8 wind energy
+
+
+
+
+#Join to HUC_8 features
+
+
+
+
+#View the outputs
+
+
+
+```
+
+### EXERCISE 3.1.2: Data aggregation
+Aggregate the HUC_8 data on the `DWQ_Basin` attribute, computing the sum of the `ACRES` and `SQ_MILES` field and view the result.
+
+```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
+#List the unique values in the DWQ_Basin field
+
+
+
+#Summarize on DWQ Basin value
+
+
+
+#Map the data
+
+
+```
+
+## 3.2 Transforming coordinate reference systems of datasets
+
+### EXERCISE 3.2.1 Projecting your data
+
+On top of projecting any geographic data to adjust for the limitations of the software, you'll also be wise to ensure all use the same CRS. This can be done with the `st_transform` command, supplying the EPSG code of the CRS that you want your data to be in. Let's get our main five sf objects all into a consistent CRS.
+
+```{r Transform the datasets to other coordinate reference systems}
+#Convert all to UTM Zone 17 (crs = 26917)
+epa_sf_utm <-      st_transform(epa_pm25_sites_sf, crs = 26917)
+counties_sf_utm <- 
+state_sf_utm <-    
+huc8_sf_utm <-     
+huc2_utm <-        
+```
+
+## 3.3 Clipping and intersecting data
+
+### EXERCISE 3.3.1 Clipping and intersecting data
+Select the counties in the "Triangle" (Chatham, Durham, Orange, and Wake). Then select the HUC_8s that touch these counties. And finally, select the portions of the HUC_8s that occur within these counties.
+
+```{r EXERCISE: Clipping}
+#Select the Triangle counties from the sf_counties dataframe
+
+
+
+  
+#Grab the intersecting HUC_8s
+
+
+
+#Intersect the HUC_8s
+
+
+
+
+```
+
