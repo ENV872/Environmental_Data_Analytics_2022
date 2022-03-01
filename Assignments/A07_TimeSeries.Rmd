@@ -36,7 +36,7 @@ The completed exercise is due on Monday, March 14 at 7:00 pm.
 2. Import the ten datasets from the Ozone_TimeSeries folder in the Raw data folder. These contain ozone concentrations at Garinger High School in North Carolina from 2010-2019 (the EPA air database only allows downloads for one year at a time). Import these either individually or in bulk and then combine them into a single dataframe named `GaringerOzone` of 3589 observation and 20 variables. 
 
 ```{r, message = FALSE}
-#1
+#2
 
 
 ```
