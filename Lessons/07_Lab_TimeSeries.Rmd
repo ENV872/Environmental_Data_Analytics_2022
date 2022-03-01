@@ -1,0 +1,187 @@
+---
+title: "7: Lab - Time Series"
+author: "Environmental Data Analytics | John Fay and Luana Lima"
+date: "Spring 2022"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Objectives
+1. Answer questions on M7
+2. Explore the components of times series: trend, seasonal, random
+3. Perform trend analysis on another dataset
+
+## Set up
+
+```{r, message = FALSE}
+
+library(tidyverse)
+library(lubridate)
+#install.packages("trend")
+library(trend)
+#install.packages("zoo")
+library(zoo)
+#install.packages("Kendall")
+library(Kendall)
+#install.packages("tseries")
+library(tseries)
+
+# Set theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
+```
+
+## Import Datasets
+
+Today we will work with data from the Climate Change Knowledge Portal from the World Bank Group. More specifically historical rainfall and temperature averages for Brazil. You will find two new data files on folder "/Data/Raw/". One with rainfall named "pr_1901_2016_BRA.csv" and another with temperature named "tas_1901_2016_BRA.csv". The data span the period from 1901 to 2016 in monthly steps. You can download the data [here][https://climateknowledgeportal.worldbank.org/download-data]
+
+Research question: Can you see any changes on the rainfall regime or average temperature over time?
+
+```{r}
+#Exercise 1: Import both datasets using the read.csv function.
+Rainfall_BR <- read.csv("./Data/Raw/pr_1901_2016_BRA.csv", stringsAsFactors = TRUE)
+
+Temp_BR <- read.csv("./Data/Raw/tas_1901_2016_BRA.csv", stringsAsFactors = TRUE)
+
+#Exercise 2: Tidy the rainfall data sets.
+#a Rename the column with Rainfall to get rid of the dots.
+#b Note that on both data sets that is a column with the month name and average. Convert it to a Month column by separating the string, i.e., month in one column and the word "Average" on another. Hint: use the separate() function in the pipe.
+#c Now you should have a column with Month. Use the paste0() function to paste month and year together and create a date object.
+#d Select only the columns of interest: Date and rainfall
+
+Rainfall_BR_processed <-
+  Rainfall_BR %>% 
+  rename( Rainfall = Rainfall....MM.) %>% 
+  separate(Statistics,c("Null","Month","Null2")," ") %>% 
+  mutate( Date = my(paste0(Month,"-",Year))) %>% 
+  select(Date,Rainfall)
+
+#Exercise 3: Repeat exercise 2 to the temperature dataset.
+Temp_BR_processed <-
+  Temp_BR %>% 
+  rename( Temperature_C = Temperature....Celsius.) %>% 
+  separate(Statistics,c("Null","Month","Null2")," ") %>% 
+  mutate( Date = my(paste0(Month,"-",Year))) %>% 
+  select(Date,Temperature_C)  
+
+
+#Exercise 4: Join the temperature and rainfall into one tidy data frame with 3 columns: Date, Rainfall and Temperature.
+BRA_complete <- inner_join(Rainfall_BR_processed,Temp_BR_processed)
+  
+           
+```
+
+
+## Initial plots
+
+```{r}
+
+#Exercise 5: Check if there is any missing data for both temperature and rainfall series.
+
+
+
+
+#Exercise 6: Plot both series over time on separate plots. Add a trend line using geom_smooth(). Can you say something about the trend just by visualizing the data?
+
+
+
+
+
+
+```
+
+## Creating time series objects
+
+```{r}
+#Exercise 7: Create a time series objects for each series using ts(). Make sure you specify the starting point and frequency.
+
+
+
+```
+
+
+## Decomposing a time series dataset
+
+A given time series can be made up of several component series: 
+
+1. A **seasonal** component, which repeats over a fixed known period (e.g., seasons of the year, months, days of the week, hour of the day)
+2. A **trend** component, which quantifies the upward or downward progression over time. The trend component of a time series does not have to be monotonic.
+3. An **error** or **random** component, which makes up the remainder of the time series after other components have been accounted for. This component reflects the noise in the dataset. 
+4. (optional) A **cyclical** component, which repeats over periods greater than the seasonal component. A good example of this is El Niño Southern Oscillation (ENSO) cycles, which occur over a period of 2-8 years.
+
+
+The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
+
+```{r}
+
+# Exercise 8: Use the stl() function to decompose both series. 
+# Visualize the decomposed series using plot(). What components can you identify?
+
+
+
+
+
+
+# Exercise 9: Use the times series object generated with the stl() to extract the 
+# components of each series and turn them into data frames.
+
+
+
+
+
+
+# Exercise 10: Visualize how the trend maps onto the data for both series
+
+
+
+
+
+
+```
+
+
+## Trend analysis
+
+Monotonic trends are a gradual shift over time that is consistent in direction. Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
+
+* **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
+* **Mann-Kendall**: no seasonality, non-parametric, missing data allowed. Function: `Kendall::MannKendall()` or `trend::mk.test()`
+* **Seasonal Mann-Kendall**: seasonality, non-parametric `Kendall::SeasonalMannKendall` or `trend::smk.test()`
+* **Spearman Rho**: no seasonality, non-parametric, missing data allowed. Function: `stats::cor.test(method="spearman")`
+
+
+```{r}
+
+# Exercise 11: Apply one of the trend detection test to the original data set. Remember that the data has seasonal component, which test can be applied in this case?
+
+
+
+
+
+
+
+
+
+# Exercise 12: Now remove the seasonality and apply another test. Compare the results with what you obtained on Exercise 9.
+
+
+
+
+
+
+
+
+
+
+
+```
+
+What would we conclude based on these findings? 
+
+> Answer:
+
+
