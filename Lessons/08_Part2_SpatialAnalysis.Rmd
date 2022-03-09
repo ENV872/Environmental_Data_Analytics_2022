@@ -1,0 +1,565 @@
+---
+title: "Spatial Analysis in R, Part 2"
+author: "Environmental Data Analytics | John Fay & Luana Lima"
+date: "Spring 2022"
+output: pdf_document
+editor_options:
+  chunk_output_type: console
+---
+
+# 1. INTRODUCTION
+
+## 1.1 Overview
+
+In the last lesson we explored the fundamentals of spatial data, coordinate reference systems, and how the `sf` package enabled us to do some basic spatial analysis. Here, we'll dive deeper into spatial analyses with the `sf` package and its ability to read and write spatial data formats.
+
+The context of our analysis here is to explore the spatial relationships between our EPA air monitoring sites and some demographic data taken from the US Census.
+
+## 1.2 Learning outcomes
+
+At the end of this lesson, you should be able to:
+- Read shapefiles and GeoJSON data into R as spatial features objects
+- Explore and wrangle spatial features using "tidyverse" functions
+- Aggregate spatial features using `group_by()` and `summarize()`
+
+Specifically, we'll [re]examine the following:
+- Reading shapefiles into R with `sf` 
+- Spatial aggregation with `group_by` and `summarize` or `st_union` 
+- Visualizing multiple datasets 
+- Changing CRS with `transform` 
+- Attribute joins with `merge` 
+- Spatial joins 
+- Geometry manipulations
+  - Buffer
+  - Convex hull
+  - Voronoi polygon
+- Select polygon by location (buffer and intersect)
+
+## 1.3 Set up
+
+The typical set up procedure: confirm the working directory and import libraries.
+
+```{r setup}
+#Examine the working directory
+getwd()
+
+#Import libraries
+library(tidyverse)
+library(lubridate)
+library(sf)
+library(mapview)
+library(RColorBrewer)
+```
+
+# 2 READING IN SPATIAL DATA
+
+## 2.1 Read tabular data and convert to spatial features
+
+First, we'll read in our EPA air quality sites, as we did in the previous exercise.
+
+```{r convert.tabular.data.to.sf.object}
+#Read our EPA points into a spatial dataframe
+epa_pm25_sites_sf <- read_csv('./Data/Raw/EPAair_PM25_NC2018_raw.csv') %>% 
+  group_by(`Site Name`, COUNTY, SITE_LATITUDE, SITE_LONGITUDE) %>% 
+  summarize(
+    meanPM = mean(`Daily Mean PM2.5 Concentration`,na.rm=T),
+    maxPM = max(`Daily Mean PM2.5 Concentration`,na.rm=T)
+    ) %>% 
+  st_as_sf(coords = c('SITE_LONGITUDE','SITE_LATITUDE'), crs=4269)
+
+#Inspect the object
+class(epa_pm25_sites_sf)
+
+#What is its CRS again?
+st_crs(epa_pm25_sites_sf)$epsg
+
+#Plot the data
+ggplot(data=epa_pm25_sites_sf) +
+  geom_sf()
+```
+
+## 2.2 Reading shapefiles into R with `sf`
+
+The `sf` package allows us to read many existing data formats, including ArcGIS shapefiles. I've added a few shapefiles to our Data folder: one of all US counties and another of 8-digit hydrologic Unit codes (HUCs) for NC. Here we explore how they are read into R as spatial features.
+
+### 2.2.1 Read in and explore NC counties
+
+Below we read in the USA counties shapefile, filtering for just the NC features (NC has a state FIPS code of "37"...). We also see that `sf` plays nice with "tidyverse" syntax (e.g. pipes) and functions (e.g. filter). The `sf` package also includes some new spatial methods for exploring our data (e.g. `st_bbox` which draws a bounding box around all spatial features).
+
+```{r read.filtered.records.from.shapefile.to.sf.object}
+#
+counties_sf<- st_read('./Data/Spatial/cb_2018_us_county_20m.shp') %>% 
+  filter(STATEFP == 37) #Filter for just NC Counties
+
+#
+colnames(counties_sf)
+
+#
+st_crs(counties_sf) 
+
+
+#
+nrow(counties_sf)
+
+#Reveal the extent of this dataset via the st_bbox() function
+st_bbox(counties_sf)
+
+#View the data
+head(counties_sf)
+
+#Plot the data, colored by area of land in each county
+mapView(counties_sf, zcol = "AWATER")
+```
+
+### 2.2.2 Read in and explore 8-digit HUC watersheds for NC
+
+*Now you try*: Read in the NC 8-Digit HUC dataset: `./Data/Spatial/NCHUC8.shp` into a variable named `huc8_sf`. What CRS does this dataset use? Is it the same as the counties dataset? What columns are included in this dataset? What do these features look like on a map?
+
+```{r read HUCs shapefile}
+#Read the shapefile into an sf dataframe named "huc8_sf"
+
+
+#Reveal the columns
+
+
+#Check the CRS
+
+
+#Examine some records
+
+
+#View the data as a map, colored by the acreage in each
+
+
+```
+
+### 2.2.3 Challenge!
+
+*Challenge*: Read in the NC 8-Digit HUC dataset again, but this time *filter* the data so the result only includes the one with a SUBBASIN value of 'Upper Neuse'. Then map this. Double bonus if you can map this HUC8 on top of the other HUC8s, showing the Upper Neuse as purple and the others as orange.
+
+```{r Select the Upper Neuse HUC 8}
+#Read the shapefile into an sf dataframe
+
+
+
+#Create a map
+
+
+```
+
+### 2.2.4 Reading in GeoJSON data
+
+More and more spatial data are appearing on-line, in a format that allows us to connect directly to the data vs downloading local copies to our workspace. An example is the Homeland Infrstructure Foundation-Level Data (HIFLD) Their open data site (<https://hifld-geoplatform.opendata.arcgis.com/>) has links to many datasets.
+
+When the data is served in GeoJSON format, we can ingest it directly in to R. Follow these steps: - Navigate to <https://hifld-geoplatform.opendata.arcgis.com/> - Scroll down to the Explore Categories area. Select Energy (for example) - Search for power plants. - Select the first return and open its [link](https://bit.ly/3aAVhz3) - Locate the APIs dropdown and copy the link to the GeoJSON option.
+
+If you have difficulty, the link you want is: - <https://opendata.arcgis.com/datasets/ee0263bd105d41599be22d46107341c3_0.geojson>
+
+This a link to a spatial dataset in GeoJSON format. Now let's read this dataset in and explore it:
+
+```{r load.geojson.data}
+powerplants_sf <- st_read('https://opendata.arcgis.com/datasets/ee0263bd105d41599be22d46107341c3_0.geojson')
+
+#Reveal the field names
+colnames(powerplants_sf)
+
+#How many records
+nrow(powerplants_sf)
+
+#View on a map - specify the geometry column to draw faster
+plot(powerplants_sf$geometry)
+
+#Filter for just powerplants found in NC
+nc_powerplants_sf <- powerplants_sf %>% 
+  filter(STATE == "NC") 
+
+#Have a look the variety of types (and number of each)
+nc_powerplants_sf %>% 
+  st_drop_geometry() %>% 
+  count(TYPE, sort=TRUE)
+
+#Most are solar farms; let's remove those
+nc_powerplants_sf <- nc_powerplants_sf %>% 
+  filter(TYPE != "SOLAR PHOTOVOLTAIC")
+
+# Examine counts by fuel type
+ggplot(nc_powerplants_sf) + 
+  geom_sf(aes(color = PRIM_FUEL)) 
+```
+
+# 3. WORKING WITH SPATIAL DATA
+
+## 3.1 Joining attributes to spatial features
+
+Joining data to spatial features works the same as joining tables: we just need a common attribute to link the two datasets. Here, we'll add demographic data to our Census county feature, using the State&County FIPS code as the common attributes.
+
+The data we'll add here is the CDC's Social Vulnerabiliy Index data. Information on this dataset is available here:
+
+Social Vulnerability Data: - <https://www.atsdr.cdc.gov/placeandhealth/svi/documentation/SVI_documentation_2018.html> - <https://www.atsdr.cdc.gov/placeandhealth/svi/documentation/pdf/SVI2018Documentation-H.pdf>
+
+Brief notes: - "E\_" are estimates; "M\_" are margins of error - "EP\_ are estimates, in percentages - "SPL_THEME1" is sum of series - "RPL_THEME1" is percentile ranking
+
+We'll focus on just a few variables: Estimates of people in poverty ("E_POV") and of minority population ("E_MINRTY"), keeping the location attributes as well.
+
+```{r join.attributes.to.spatial features}
+#Read the 2018 SVI county-level dataset for NC
+svi2018_nc_raw <- read.csv(
+  'https://svi.cdc.gov/Documents/Data/2018_SVI_Data/CSV/States_Counties/NorthCarolina_COUNTY.csv',
+  colClasses = c('FIPS' = 'factor')) %>% 
+  select(COUNTY, FIPS, LOCATION, E_TOTPOP, E_POV, E_MINRTY)
+
+#Check structure
+str(svi2018_nc_raw)
+
+#Join the SVI attributes to the county spatial features
+counties_sf_join <-  merge(x = counties_sf,
+                           y = svi2018_nc_raw, 
+                           by.x = "GEOID", 
+                           by.y = "FIPS" )
+
+#Tidyverse version of the join
+counties_sf_join <- counties_sf %>% 
+  left_join(svi2018_nc_raw, by = c("GEOID" = "FIPS") )
+
+#View with mapview
+mapview(counties_sf_join, 
+        zcol = 'E_POV', 
+        col.regions = brewer.pal(2, 'RdBu')) + 
+  mapview(epa_pm25_sites_sf, cex = 'maxPM')
+
+#view with ggplot
+ggplot() + 
+  geom_sf(data=counties_sf_join,aes(fill = E_POV),alpha=0.3) + 
+  scale_fill_gradient2(low="red",high="blue",midpoint = 60000) + 
+  geom_sf(data=epa_pm25_sites_sf)
+
+```
+
+*Now you try*: The URL '<https://raw.githubusercontent.com/ENV859/EnviroAtlasData/main/Wind_Energy.csv>' links to EPA's EnviroAtlas data on the amount of wind energy estimated at the HUC12 scale. You need to load this data, group by HUC8 (computing the sum wind energy of each HUC12 in a given HUC8) and join with the HUC 8 spatial features dataset. \* Be sure, as above, you read in the `HUC_12` column as a factor so it doesn't default to a numeric column.
+
+```{r}
+#Compute HUC8 wind energy
+
+
+
+
+#Join to HUC_8 features
+
+
+
+
+#View the outputs
+
+
+
+```
+
+## 3.1 Spatial data aggregation with `group_by` and `summarize`.
+
+Here, we'll explore another way in which `sf` works well with tidyverse functions. Specifically, we'll see how the `group_by` and `summarize` functions work on spatial features much like they do with tabular records. In GIS, this is termed "dissolving" features because we are dissolving away boundaries shared by features with a common attribute value.
+
+In our case, all of our county features share the same "STATEFP" value, so we'll effectively dissolve away all county boundaries, leaving us with one feature: the outline of North Carolina.
+
+```{r Dissolve all counties into a single feature}
+#Aggregate the data using group_by and summarize, just as you would a non-spatial dataframe
+state_sf <- counties_sf %>% 
+  group_by('STATEFP') %>% 
+  summarize(ALAND = sum(ALAND))
+
+#View the data
+mapview(state_sf)
+```
+
+*Now you try*: Aggregate the HUC_8 data on the `DWQ_Basin` attribute, computing the sum of the `ACRES` and `SQ_MILES` field and view the result.
+
+```{r Aggregate the HUC data on an attribute, saving as huc2_sf}
+#List the unique values in the DWQ_Basin field
+
+
+
+
+#Summarize on DWQ Basin value
+
+
+
+
+  
+#Map the data
+
+```
+
+## 3.2 Transforming coordinate reference systems of datasets
+
+### 3.2.1 Review: Geographic vs projected data
+
+When grouping data above, you may have noticed warnings that "although coordinates are longitude/latitude, st_union assumes that they are planar". This gets us back to our conversation on projections.
+
+Recall that we have two basic categories of coordinate systems: **geographic**, where coordinates are measured in angles (e.g. degrees of latitude and longitude); and **projected**, where coordinates are measured in linear units (e.g. meters or feet). The former maps our features on a sphere, and the latter maps our features on a plane. And the process of migrating spherical coordinates to planar ones is call "projecting" - and it involves a lot of math as well as various assumptions about the shape of the Earth, which is not a perfect sphere.
+
+### 3.2.2 Reasons to project data before doing spatial analysis
+
+Projecting data has trade-offs. On the negative side, projecting data distorts data (for the same reason that you can flatten an orange peel without stretching or tearing it). But on the positive side, planar data is much easier to work with, both mathematically and visually (on our flat screens as well on flat printed maps).
+
+What I'm getting at is: it's often a good idea to project data before doing spatial analysis. Packages like `sf` are suited to planar, not spherical data. And measuring distances and areas is much more sensible in linear units, not angular ones.
+
+> Note: GIS software is getting better at working with angular values and also with visualizing 3D (i.e. spherical) data. It's not quite ubiquitous yet, but keep your eye on this.
+
+### 3.2.3 Projecting your data
+
+On top of projecting any geographic data to adjust for the limitations of the software, you'll also be wise to ensure all use the same CRS. This can be done with the `st_transform` command, supplying the EPSG code of the CRS that you want your data to be in. Let's get our main five sf objects all into a consistent CRS.
+
+```{r Transform the datasets to other coordinate reference systems}
+#Convert all to UTM Zone 17 (crs = 26917)
+epa_sf_utm <-      st_transform(epa_pm25_sites_sf, crs = 26917)
+counties_sf_utm <- st_transform(counties_sf, crs = 26917)
+state_sf_utm <-    st_transform(state_sf,crs = 26917)
+huc8_sf_utm <-     st_transform(huc8_sf, crs = 26917)
+huc2_utm <-        st_transform(huc2_sf, crs = 26917)
+```
+
+## 3.3 Clipping and intersecting data
+
+Now that our data are all in a common planar coordinate systems, let's examine what we can do with them. The [sf cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/sf.pdf) provides a nice summary of the types of operations. You'll see we already used a few of the functions listed here. Now, let's explore some more, starting with clipping one dataset with another.
+
+In the exercise below, we'll subset one of the HUCs (Upper Neuese), and explore counties that spatially overlap with this selected HUC. You'll see there are two ways to subset data spatially.
+
+```{r spatial.overlap.exercises}
+#Clip the HUC2 data set by the NC State boundary dataset
+neuse_sf <- huc2_utm %>% 
+  filter(DWQ_Basin == "Neuse")
+
+#Start building a map object
+myMap = mapview(neuse_sf, 
+                col.regions = 'yellow', 
+                alpha.regions = 0.2,
+                map.types = "CartoDB.Positron",
+                legend = FALSE)
+#Show the map
+myMap
+
+#Select intersecting counties using matrix subsetting
+neuse_intersect_1 <- counties_sf_utm[neuse_sf,]
+
+#Select intersecting counties using the `filter()` command
+neuse_intersect_2 <- counties_sf_utm %>% 
+  filter(st_intersects(x = ., y = neuse_sf, sparse = FALSE))
+
+#View the result
+myMap + mapview(neuse_intersect_2, alpha.regions = 0)
+
+#Actually intersect the counties (not just select those that intersect)
+neuse_counties_sf <- neuse_sf %>% 
+  st_intersection(counties_sf_utm)
+myMap + mapview(neuse_counties_sf, alpha.regions = 0)
+
+#Update the area the features, now that some are clipped
+neuse_counties_sf <- neuse_counties_sf %>% 
+  mutate(Area_m2 = st_area(neuse_counties_sf$geometry)) %>% 
+  as.numeric()
+mapview(neuse_counties_sf, zcol='Area_m2')
+
+```
+
+*Now you try*: Select the counties in the "Triangle" (Chatham, Durham, Orange, and Wake). Then select the HUC_8s that touch these counties. And finally, select the portions of the HUC_8s that occur within these counties.
+
+```{r EXERCISE: Clipping}
+#Select the Triangle County from the 
+
+
+
+  
+#Grab the intersecting HUC_8s
+
+
+
+#Intersect the HUC_8s
+
+
+
+
+```
+
+## 3.3 Geometry manipulations
+
+Now that our data are all in a common planar coordinate systems, let's examine what we can do with them. The [sf cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/sf.pdf) provides a nice summary of the types of operations. You'll see we already used a few of the functions listed here.
+
+Here, we'll explore some of these operations on spatial features so you can get a feel for how they work. - Extract centroids of features - Buffering features - Union many features to a single multi-part features - Compute convex hulls from multi-part features - Compute Voronoi polygons from multi-part features
+
+```{r}
+#Select the triangle counties into a new sf data frame
+triCo <- counties_sf_utm %>% 
+  filter(NAME %in% c("Durham","Wake", "Orange", "Chatham")) 
+
+#Plot
+myMap = ggplot() + 
+  geom_sf(data = triCo)
+myMap
+
+#Extract the centroids of the selected features and show them
+triCo_centroids <-  st_centroid(triCo)
+myMap <- myMap + geom_sf(data = triCo_centroids, color = 'blue')
+myMap
+
+#Buffer the centroids outward 2km and add them to our
+triCo_centroids_2km <- st_buffer(triCo_centroids, 2000)
+myMap <- myMap + geom_sf(data = triCo_centroids_2km, color = 'orange', fill=NA)
+myMap
+
+#Buffer the counties inward 2km
+triCo_in2km <- st_buffer(triCo, -2000)
+myMap <- myMap + geom_sf(data = triCo_in2km, color = 'green', fill=NA)
+myMap
+
+#Combine the centroids into one feature and construct a convex hull around them
+triCo_centroids_chull <- triCo_centroids %>% 
+  st_union() %>% 
+  st_convex_hull()
+myMap <- myMap + geom_sf(data = triCo_centroids_chull, color = 'red', fill=NA)
+myMap
+
+#Combine the centroids into one feature and draw voronoi polygons
+triCo_centroids_voronoi <- triCo_centroids %>% 
+  st_union() %>% 
+  st_voronoi()
+myMap <- myMap + geom_sf(data = triCo_centroids_voronoi, color = 'purple', fill=NA)
+myMap
+
+```
+
+## 3.4 Spatial selection
+
+We can also use location to select features.
+
+```{r Select the county in which user provided lat/long pair is found}
+#User coordinates
+userLat = 36.0045442
+userLng = -78.9426381
+
+#Create a simple features point geometry from the point
+theSite_sfp <- st_point(c(userLng,userLat))
+
+#Create a simple features column from the point geometry object
+theSite_sfc <- st_sfc(theSite_sfp, crs = 4326)
+
+#Transform the mask to match the CRS of the counties dataset
+theSite_sfc_transformed <- st_transform(theSite_sfc, crs = st_crs(counties_sf_utm))
+
+#Create a boolean mask 
+resultMask <- st_intersects(counties_sf_utm, 
+                            theSite_sfc_transformed,
+                            sparse = FALSE) #The `sparse` option returns a Boolean mask
+
+#Filter the counties dataset using the boolean mask
+selCounties <- counties_sf_utm[resultMask,]
+
+#Map the results
+mapView(counties_sf[resultMask,])
+
+```
+
+> Questions: how might we use the `st_buffer` function to show all counties within 30km of the site?
+
+```{r Select counties within a 30 km area from the site}
+
+
+
+                            
+```
+
+# 4. VISUALIZATION
+
+Lastly, let's take a deeper dive into the various ways to visualize our spatial data. We've done a bit of this already, but let's formalize and expand what we've covered. You can take these visualizations much further than what we are presenting here, but these should reveal the basic strucutre and a few "gotchas" when constructing these plots.
+
+## 4.1 Visualizing Multiple Datasets with `ggplot`
+
+When we import sf, we add the `geom_sf` option to ggplot. This geometry works much like other geoms, but with a few additional options. Here we see that order of plotting is important.
+
+```{r Vsualizing mulitple dataset with ggplot}
+#Wrong order
+ggplot()  +
+  geom_sf(data = epa_sf_utm, color='white', size=2) +
+  geom_sf(data = counties_sf_utm, aes(fill = ALAND), color = 'white')  +
+  geom_sf(data = state_sf_utm, color='red',size=2) + 
+  scale_fill_gradient(low="yellow", high="darkgreen")
+
+#Right order
+ggplot() +
+  geom_sf(data = state_sf_utm, color='red',size=2) +
+  geom_sf(data = counties_sf_utm, aes(fill = ALAND), color = 'white')  +
+  geom_sf(data = epa_sf_utm, color='blue', size=2) + 
+  scale_fill_gradient(low="yellow", high="darkgreen")
+```
+
+## 4.2 Plotting with Leaflet
+
+Leaflet is the most powerful of the three. However it requires getting all our data back into the WGS 84 CRS.
+
+### 4.2.1 Multiple layers in Leaflet
+
+```{r transform.data.back.to.WSG84}
+# Convert all to WGS84 (crs=4326)
+EPAair_wgs84 <- st_transform(epa_pm25_sites_sf, c=4326)
+counties_WGS84 <- st_transform(counties_sf_utm, c=4326)
+state_WGS84 <- st_transform(state_sf,c=4326)
+huc8s_WGS84 <- st_transform(huc8_sf,c=4326)
+huc2_WGS84<- st_transform(huc2_sf,c=4326)
+
+#Now plot with leaflet: no errors as all layers are in Leaflet's native CRS (WGS84)
+leaflet() %>% addTiles() %>% 
+  addPolygons(data=counties_WGS84,weight=1,color='red') %>% 
+  addPolygons(data=huc8_sf,weight=1)
+```
+
+### 4.2.2 Changing basemaps in Leaflet
+
+Tip: See <http://leaflet-extras.github.io/leaflet-providers/> for other basemaps
+
+```{r Visualizing multiple datasets with leaflet}
+leaflet() %>% 
+  addProviderTiles(providers$Esri.DeLorme) %>%  
+  addPolygons(data = counties_WGS84, 
+              color = "orange", 
+              weight = 1, 
+              smoothFactor = 0.5,   
+              opacity = 1.0, 
+              fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlGnBu", ALAND)(ALAND)) %>% 
+  addPolygons(data = huc2_WGS84, 
+              color=NA, 
+              weight = 2) %>% 
+  addMarkers(data=EPAair_wgs84,
+             popup = ~as.character(`Site Name`))
+
+```
+
+### 4.2.3 Leaflet - linked and synced plots
+
+```{r Visualizing multiple datasets with leaflet: linked and synced maps}
+m1 <- leaflet() %>% 
+  addTiles() %>%  
+  addPolygons(data = counties_WGS84, color = "orange", weight = 1, smoothFactor = 0.5,   
+              opacity = 1.0, fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlOrRd", ALAND)(ALAND)) %>% 
+  addMarkers(data=EPAair_wgs84,popup = ~as.character(`Site Name`))
+
+
+m2 <- leaflet() %>% 
+  addProviderTiles(providers$Stamen.TonerHybrid) %>% 
+  addPolygons(data = huc8s_WGS84,weight=0.2,color='red') %>% 
+  addCircleMarkers(data=EPAair_wgs84,
+                   radius=(~meanPM*2),
+                   stroke = FALSE, 
+                   fillOpacity = 0.3,
+                   popup = ~as.character(`Site Name`))
+
+
+
+#install.packages("leafsync")
+library(leafsync)
+
+#Create an lattice view of the two leaflet maps
+latticeview(m1, m2)
+
+#Create a synchronized view...
+sync(m1,m2)
+```
