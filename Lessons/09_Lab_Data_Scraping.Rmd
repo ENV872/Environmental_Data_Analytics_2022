@@ -184,7 +184,7 @@ APIs are great, when they are available. But if not, we can still scrape data fr
 Let's scrape data the US Energy Administration's State Electricity Archive:
 <https://www.eia.gov/electricity/state/>
 
-1. Navigate to the page. Note these data are for 2019
+1. Navigate to the page. Note these data are for 2020
  * Check for terms of service or robots.txt
 2. Use the Selector Gadget tool to scrape the following values into lists: 
  * State name
@@ -240,7 +240,7 @@ scrape.it <- function(the_year){
 # Use the above function to scrape data for 2017
 
 
-# Map the function to scrape data from 2017 to 2019
+# Map the function to scrape data from 2017 to 2020
 
 
 ```
