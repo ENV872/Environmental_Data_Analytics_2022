@@ -11,7 +11,7 @@ output:
 
 1. Questions on M10/A09
 2. Talk about final project (groups/prompt/rubric)
-    Enter groups [here][https://docs.google.com/spreadsheets/d/16LHgSIx3SLQNjyWSKMkFvPCc26phm38q5F3crwZIfGY/edit?usp=sharing] 
+    Enter groups [here][https://docs.google.com/spreadsheets/d/1rI5c4dOzbmg3JRVJbkOEEIA7m5EtNTtslQbCw255cZ0/edit?usp=sharing] 
 3. Questions on M11
 4. Exercise 1: Fill lesson file for M11
 5. Exercise 2: Shiny app
